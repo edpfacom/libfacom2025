@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<assert.h>
 
+
 typedef struct _node{
     int reg;
     struct _node * prox;
