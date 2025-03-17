@@ -9,7 +9,7 @@ typedef struct _node{
 }pnode;
 
 void cria_pilha(pnode ** pilha){
-    printf("cria_pilha &pilha %p\n",&pilha);
+    printf("ria_pilha &pilha %p\n",&pilha);
     printf("cria_pilha pilha %p\n",pilha);
     printf("cria_pilha *pilha %p\n",*pilha);
     *pilha = NULL;
