@@ -34,7 +34,23 @@ int filho_dir(int i){
     return i*2 +2;
 }
 
+void troca(int *a,int *b){
+    int aux = *a;
+    *a  = *b;
+    *b  = aux;
+}
 void desce(theap * heap,int i){
+    int e = filho_esq(i);
+    int d = filho_dir(i);
+    int imax = i;
+    if (e < heap->n && heap->v[e] > heap->v[imax])
+        imax = e;
+    if (d < heap->n && heap->v[d] > heap->v[imax])
+        imax = d;
+    if (imax != i){
+        troca(&(heap->v[i]),&(heap->v[imax]));
+        desce(heap,imax);
+    }
 }
 
 /* FUNCOES TESTE*/
@@ -93,6 +109,7 @@ void test_desce(){
     /*chamada funcoes*/
     constroi_heap(&heap,max);
     heap.v = memcpy(heap.v,vi,sizeof(vi));
+    heap.n = 15;
     desce(&heap,0); 
     /*testes*/
     assert(heap.v[0]==20);
