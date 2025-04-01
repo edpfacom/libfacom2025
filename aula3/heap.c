@@ -60,6 +60,33 @@ void constroi_max_heap(theap * heap){
 
 }
 
+int acessa_max(theap * heap){
+    return heap->v[0];
+}
+
+
+int heap_extrai_max(theap * heap){
+    int max = heap->v[0];
+    int i = heap->n -1;
+    heap->v[0] = heap->v[i];
+    heap->n = i;
+    desce(heap,0);
+    return max;
+}
+
+void sobe(theap * heap,int i){
+    int p;
+    if ((i > 0) && (i < heap->n)){
+        p = pai(i);
+        while (heap->v[p] < heap->v[i]){
+            troca(&heap->v[p],&heap->v[i]);
+            i = p; 
+            p = pai(i);
+             
+        }
+    }
+}
+
 /* FUNCOES TESTE*/
 void test_constroi_heap(){
     /*inicializacao*/
@@ -205,6 +232,50 @@ void test_extrai_max(){
     assert(heap.v[3]==9);
     assert(heap.v[8]==4);
 }
+void test_sobe(){
+   /*inicializacao*/
+
+    theap heap;
+    int max = 20;
+    int vi[] = {26,18,16,12,11,8,14,6,9,19};
+    int i;
+    
+    /*chamada funcoes*/
+    constroi_heap(&heap,max);
+    heap.v = memcpy(heap.v,vi,sizeof(vi));
+    heap.n = 10;
+    sobe(&heap,0);
+    sobe(&heap,1);
+    sobe(&heap,2);
+    sobe(&heap,9);
+
+    /*teste*/
+    assert(heap.v[1]==19);
+    assert(heap.v[4]==18);
+    assert(heap.v[9]==11);
+
+}
+void test_insere(){
+   /*inicializacao*/
+
+    theap heap;
+    int max = 20;
+    int vi[] = {26,18,16,12,11,8,14,6,9,4};
+    int i;
+    
+    /*chamada funcoes*/
+    constroi_heap(&heap,max);
+    heap.v = memcpy(heap.v,vi,sizeof(vi));
+    heap.n = 10;
+    /*heap_insere(&heap,30);*/
+
+    /*teste*/
+    assert(heap.v[1]==19);
+    assert(heap.v[4]==18);
+    assert(heap.v[9]==11);
+
+}
+
 
 int main(void){
     test_constroi_heap();
@@ -215,6 +286,8 @@ int main(void){
     test_constroi_max_heap();
     test_acessa_max();
     test_extrai_max();
+    test_sobe();
+    /*test_insere();*/
     printf("SUCESSO!\n");
     return EXIT_SUCCESS;
 }
