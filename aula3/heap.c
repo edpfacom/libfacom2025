@@ -87,6 +87,28 @@ void sobe(theap * heap,int i){
     }
 }
 
+int heap_insere(theap * heap,int n){
+    if (heap->n < heap->max){
+        heap->v[heap->n] = n;
+        heap->n++;
+        sobe(heap,heap->n-1);
+        return EXIT_SUCCESS;
+    }else{
+        return EXIT_FAILURE;
+    }
+}
+
+
+void heapsort(theap * heap){
+    int i;
+    constroi_max_heap(heap);
+    for (i = heap->n -1 ;i >0; i--){
+        troca(&heap->v[0],&heap->v[i]);
+        heap->n--;
+        desce(heap,0);
+    }
+
+}
 /* FUNCOES TESTE*/
 void test_constroi_heap(){
     /*inicializacao*/
@@ -267,14 +289,35 @@ void test_insere(){
     constroi_heap(&heap,max);
     heap.v = memcpy(heap.v,vi,sizeof(vi));
     heap.n = 10;
-    /*heap_insere(&heap,30);*/
+    heap_insere(&heap,30);
 
     /*teste*/
-    assert(heap.v[1]==19);
+    assert(heap.v[0]==30);
+    assert(heap.v[1]==26);
     assert(heap.v[4]==18);
-    assert(heap.v[9]==11);
-
+    assert(heap.v[10]==11);
 }
+
+void test_heapsort(){
+
+    /*inicializacao*/
+
+    theap heap;
+    int max = 20;
+    int vi[] = {9,4,8,6,26,16,14,18,12,11};
+    int vo[] = {4,6,8,9,11,12,14,16,18,26};
+    int i;
+    
+    /*chamada funcoes*/
+    constroi_heap(&heap,max);
+    heap.v = memcpy(heap.v,vi,sizeof(vi));
+    heap.n = 10;
+    heapsort(&heap);
+    /*testes*/
+    for (i=0;i<heap.n;i++)
+        assert(heap.v[i]==vo[i]);
+}
+
 
 
 int main(void){
@@ -287,7 +330,8 @@ int main(void){
     test_acessa_max();
     test_extrai_max();
     test_sobe();
-    /*test_insere();*/
+    test_insere();
+    test_heapsort();
     printf("SUCESSO!\n");
     return EXIT_SUCCESS;
 }
