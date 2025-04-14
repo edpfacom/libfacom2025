@@ -15,6 +15,10 @@ void * aloca_reg(int id, int idade){
     reg->idade = idade;
 }
 
+int comparador(void *a, void *b){
+    return ((treg *)a)->id - ((treg *)b)->id;
+}
+
 
 
 /*Definições desenvolvedor da biblioteca*/
@@ -39,10 +43,6 @@ void abb_constroi(tarv * arv, int (*cmp)(void *a, void *b)){
 }
 
 /*teste*/
-int comparador(void *a, void *b){
-    return ((treg *)a)->id - ((treg *)b)->id;
-}
-
 void test_constroi(){
     /* declaracao de variaveis */
     tarv arv;
