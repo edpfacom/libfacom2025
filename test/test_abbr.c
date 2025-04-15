@@ -13,6 +13,7 @@ void * aloca_reg(int id, int idade){
     reg = malloc(sizeof(treg));
     reg->id = id;
     reg->idade = idade;
+    return reg;
 }
 
 int comparador(void *a, void *b){
@@ -96,6 +97,17 @@ void abb_destroi(tarv *arv){
 
 
 tnode ** _abb_busca(tarv *arv, tnode ** atual, void * key){
+    int rcomp;
+    if (*atual != NULL){
+        rcomp = arv->cmp( ((tnode *)*atual)->key, key );
+        if (rcomp == 0){
+            return atual;
+        }else if (rcomp > 0){
+            return _abb_busca(arv, &(((tnode *) *atual)->esq),key);
+        }else{
+            return _abb_busca(arv, &(((tnode *) *atual)->dir),key);
+        }
+    }
 }
 
 tnode ** abb_busca(tarv *arv, void * key){
@@ -105,6 +117,37 @@ tnode ** abb_busca(tarv *arv, void * key){
 
 
 void _remove_raiz(tnode ** raiz){
+    tnode **sucessor;
+    tnode **predecessor;
+    tnode *aux;
+    tnode *praiz;
+    /*caso 1: no folha*/
+    if ((((tnode *)*raiz)->esq == NULL) &&(((tnode *)*raiz)->dir == NULL)){
+        free(*raiz);
+        *raiz = NULL;
+    }else if ((*raiz)->dir != NULL){ /*caso 2: remove sucessor*/
+        sucessor = &((*raiz)->dir);
+        while( (*sucessor)->esq != NULL)
+            sucessor = &(*sucessor)->esq;
+        aux = *sucessor;
+        *sucessor = (*sucessor)->dir;
+        if (aux->dir  != (*raiz)->dir)
+            aux->dir  = (*raiz)->dir;
+        aux->esq  = (*raiz)->esq;
+        free(*raiz);
+        *raiz = aux;
+    }else{ /*caso 3: remove predecessor*/
+        predecessor = &((*raiz)->esq);
+        while( (*predecessor)->dir != NULL)
+            predecessor = &(*predecessor)->dir;
+        aux = *predecessor;
+        *predecessor = (*predecessor)->esq;
+        if (aux->esq  != (*raiz)->esq)
+            aux->esq  = (*raiz)->esq;
+        aux->dir  = (*raiz)->dir;
+        free(*raiz);
+        *raiz = aux;
+    }
 }
 
 int abb_remove(tarv *arv, void * key){
@@ -249,8 +292,8 @@ void test_remove(){
 int main(void){
     test_constroi();
     test_insere();
-   /* test_busca();
-    test_remove();*/
+    test_busca();
+    test_remove();
     printf("SUCCESS!!\n");
     return EXIT_SUCCESS;
 }
