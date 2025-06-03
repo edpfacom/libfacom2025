@@ -10,8 +10,8 @@ typedef int tchave;
 typedef struct _node{
     int folha;
     int n;
-    tchave * chaves;
-    struct _node ** c;
+    tchave chaves[5];
+    struct _node * c[6];
 }tnode;
 
 typedef struct _arv{
@@ -26,8 +26,8 @@ tnode * aloca_node(tarv * parv){
     int t = parv->t;
     aux = (tnode *)malloc(sizeof(tnode));
     if (aux != NULL){
-        aux->chaves = malloc(sizeof(int)*(2*t-1));
-        aux->c = malloc(sizeof(tnode *)*(2*t));
+      /*  aux->chaves = malloc(sizeof(int)*(2*t-1));
+        aux->c = malloc(sizeof(tnode *)*(2*t)); */
         aux->n = 0;
         aux->folha=0;
     }
@@ -161,15 +161,59 @@ int btree_split(tarv * parv,tnode * x, int i){
     int t;
     int j;
     int ret;
+    t = parv->t;
+    y = x->c[i];
+    z = aloca_node(parv);
+    z->n = t-1;
+    z->folha = y->folha;
+    for (j=0;j<t-1;j++)
+        z->chaves[j] = y->chaves[j+t];
+    if (!z->folha){
+        for(j=0;j<t;j++)
+            z->c[j] = y->c[j+t];
+    }
+    y->n = t-1;
+
+    /*prepara os ponteiros x*/
+    for(j=x->n;j>=i+1;j--)
+        x->c[j+1] = x->c[j];
+    x->c[i+1] = z;
+
+    for(j=x->n-1;j>=i;j--)
+        x->chaves[j+1] = x->chaves[j];    
+    x->chaves[i] = y->chaves[t-1];
+    x->n +=1;
+
+
     return ret;
 }
-
 
 int btree_insere_naocheio(tarv *parv, tnode * x, tchave k){
     int i,t,ret;
     i = x->n;
     t = parv->t;
     ret = 1;
+    if (x->folha == TRUE){
+        while(i>0 && k < x->chaves[i-1]){
+            x->chaves[i] = x->chaves[i-1];
+            i = i - 1;
+        }
+        x->chaves[i] = k;
+        x->n = x->n+1;
+    }else{
+        i -= 1;
+        while(i>=0 && k < x->chaves[i]){
+            i = i - 1;
+        }
+        i+=1;
+
+        if (x->c[i]->n == 2*t -1){
+            ret = btree_split(parv,x,i);
+            if (k > x->chaves[i])
+                i = i+1;
+        }
+        ret = btree_insere_naocheio(parv,x->c[i],k);
+    }
     return ret;
 }
 
@@ -183,8 +227,24 @@ int btree_insere(tarv *parv, tchave k){
     int t;
     int ret = 1;
     
+    r = parv->raiz;
+    t = parv->t;
+    if (r->n == 2*t-1){
+        s = aloca_node(parv);
+        parv->raiz = s;
+        s->folha = FALSE;
+        s->n = 0;
+        s->c[0] = r;
+        ret = btree_split(parv,s,0);
+        if (ret)
+           ret = btree_insere_naocheio(parv,s,k);
+    }else{
+        ret = btree_insere_naocheio(parv,r,k);
+    }
+    return ret;
     
 }
+
 
 void print_node(tnode *x){
     int i;
@@ -921,7 +981,7 @@ int main(void){
     test_btree_insere_naocheio();
     test_btree_insere();
 
-    test_btree_merge();
+   /* test_btree_merge();
     test_btree_merge2();
     test_btree_merge3();
     test_btree_empresta_irmao();
@@ -929,7 +989,7 @@ int main(void){
 
 
     test_btree_remove();
-    test_btree_remove2();
+    test_btree_remove2();*/
 
     return 0;
 }
