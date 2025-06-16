@@ -39,7 +39,7 @@ int max(int a,int b){
 int altura(tnode *arv){
     int ret;
     if (arv==NULL){
-        ret = 0;
+        ret = -1;
     }else{
         ret = arv->h;
     }
@@ -115,7 +115,7 @@ void insere_avl(tnode ** parv,treg reg){
         (*parv)->reg = reg;
         (*parv)->esq = NULL;
         (*parv)->dir = NULL;
-        (*parv)->h = 1;
+        (*parv)->h = 0;
 
     }else if(cmpfunc(&((*parv)->reg), &reg)>0){
         insere_avl(&(*parv)->esq,reg);

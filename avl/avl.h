@@ -11,9 +11,9 @@ typedef struct node * pnode;
 
 typedef struct node{
     treg reg;
-    pnode esq;
-    pnode dir;
-    pnode pai;     
+    struct node * dir;
+    struct node * esq;
+    struct node * pai;     
     int h;
 }tnode;
 

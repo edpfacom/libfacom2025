@@ -141,18 +141,134 @@ tchave predecessor(tnode *x, tchave k){
         aux = x->c[x->n];
     return aux->chaves[aux->n-1];
 }
-
 void merge(tarv *parv, tnode *x, int cpos){
+    tnode *y;
+    tnode *z;
+    int i;
+    y = x->c[cpos];
+    z = x->c[cpos+1];
+    /*copia elementos e chaves de z em y */
+    y->chaves[y->n] = x->chaves[cpos];
+    for (i = 0;i<z->n;i++){
+        y->chaves[y->n+1+i] = z->chaves[i];
+        if (!y->folha){
+            y->c[y->n+1+i] = z->c[i];
+        }
+    }
+    if (!y->folha){
+        for (i = 0;i<=z->n;i++)
+            y->c[y->n+1+i] = z->c[i];
+    }
+    y->n = 2*(parv->t)-1;
+    /*arruma x com o elemento a menos */
+    for (i=cpos;i<x->n-1;i++){
+        x->chaves[i] = x->chaves[i+1];
+        x->c[i+1] = x->c[i+2];
+    }
+    x->n -= 1;
+    if (x->n == 0){ /* trata o caso quando o merge apaga o faz join com o ultimo elemento de x*/
+        for (i=0;i<y->n;i++){
+            x->chaves[i] = y->chaves[i];
+            x->c[i] = y->c[i];
+        }
+        x->c[i] = y->c[i];
+        x->folha = y->folha;
+        x->n = 2*(parv->t) -1;
+        free(y);
+    }
+    free(z);
 }
 
 void pega_emprestado_irmao(tnode *x, int cpos,int irmao){
-}
+    int i;
+    tnode *y,*z;
+    if (cpos < irmao){ /* irmao a direita*/
+        y = x->c[cpos];
+        z = x->c[cpos+1];
+        y->chaves[y->n] = x->chaves[cpos];
+        x->chaves[cpos] = z->chaves[0];
+        y->c[y->n+1] = z->c[0];
+        for (i=0;i < z->n-1;i++){
+            z->chaves[i] = z->chaves[i+1];
+            z->c[i] = z->c[i+1];
+        }
+        z->c[i] = z->c[i+1];
+        z->n-=1;
+        y->n+=1;
+    }else{ /*irmao a esquerda*/
+        cpos -=1;
+        y = x->c[cpos];
+        z = x->c[cpos+1];
+        for (i=z->n;i>0;i--){
+            z->chaves[i] = z->chaves[i-1];
+            z->c[i+1] = z->c[i];
+        }
+        z->chaves[0] = x->chaves[cpos];
+        z->c[0] = y->c[y->n];
+        x->chaves[cpos] = y->chaves[y->n-1];
+        y->n-=1;
+        z->n+=1;
+    }
 
+}
 int _btree_remove(tarv *parv, tnode * x, tchave k){
+    int ik; /* key position */
+    int t;
+    int i;
+    int iirmao_maior;
+    tnode *y,*z;
+    tchave klinha;
+    int ret;
+    ret = 1;
+    t = parv->t;
+    ik = procura_chave(x,k); 
+    if (ik >=0 ){ /* k in x*/
+        if (x->folha){ /* Caso 1*/
+            remove_chave(x,ik);
+        }else{ /* Caso 2 */
+            y = x->c[ik];
+            z = x->c[ik+1];
+            if (y->n >= t){ /* a */
+                klinha = predecessor(x,k);
+                x->chaves[ik] = klinha;
+                ret = _btree_remove(parv,y,klinha);
+
+            }else if (z->n >= t){ /* b */
+                klinha = sucessor(x,k);
+                x->chaves[ik] = klinha;
+                ret = _btree_remove(parv,z,klinha);
+            }else if ((y->n == t -1) && (z->n == t-1)){ /* c */
+                merge(parv,x,ik);
+                ret = _btree_remove(parv,x,k);
+            }
+        }
+    }else{ /* Caso 3 - k not in x */
+        if (x->folha == TRUE){
+            ret = 0;
+        }else{
+            i = procura_ic(x,k);
+            if (x->c[i]->n == t-1){
+                iirmao_maior = pega_irmao_maior(x,i);
+                if (x->c[iirmao_maior]->n >=t){            /* a */
+                    pega_emprestado_irmao(x,i,iirmao_maior);
+                   ret = _btree_remove(parv,x->c[i],k);
+                }else if (x->c[iirmao_maior]->n == t-1){   /* b */
+                    merge(parv,x,menor(i,iirmao_maior)); 
+                   ret = _btree_remove(parv,x,k);
+                }
+            }else{
+                ret = _btree_remove(parv,x->c[i],k);
+            }
+        }
+    }
+    return ret;
 }
 
 int btree_remove(tarv *parv, tchave k){
+    printf("Removendo %d\n",k);
+    return _btree_remove(parv,parv->raiz,k);
 }
+
 
 
 int btree_split(tarv * parv,tnode * x, int i){
@@ -981,7 +1097,7 @@ int main(void){
     test_btree_insere_naocheio();
     test_btree_insere();
 
-   /* test_btree_merge();
+    test_btree_merge();
     test_btree_merge2();
     test_btree_merge3();
     test_btree_empresta_irmao();
@@ -989,7 +1105,7 @@ int main(void){
 
 
     test_btree_remove();
-    test_btree_remove2();*/
+    test_btree_remove2();
 
     return 0;
 }
